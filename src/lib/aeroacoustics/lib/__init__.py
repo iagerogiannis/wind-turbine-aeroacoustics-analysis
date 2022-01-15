@@ -1,6 +1,6 @@
 import math
 import numpy as np
-from lib.units import *
+from src.lib.units import *
 
 g = 1.4
 R = 287.
@@ -34,11 +34,11 @@ def wave_length(f, c):
 
 
 def reduced_sound_impedance(f, sigma_):
-    return 1 + 9.08 * (1000. * f / sigma_) ** (-0.75) + (11.9 * (1000. * f / sigma_) ** (-0.73)) * 1j
+    return 1. + 9.08 * (1000. * f / sigma_) ** (-0.75) + (11.9 * (1000. * f / sigma_) ** (-0.73)) * 1j
 
 
 def alpha(k0):
-    return (.5 / k0) * 1j
+    return (1. / (2. * k0)) * 1j
 
 
 def betta(k, k0):
@@ -46,22 +46,22 @@ def betta(k, k0):
 
 
 def delta(k, k0):
-    return 1 - (k0 / k) ** 2
+    return 1. - (k0 / k) ** 2
 
 
 def kappa(c, f, z=None, z_t=None, z_M=None, atmospheric_absorption_term=None, check_absorbing_layer=True):
     def absorbing_layer_term():
         nonlocal f, z, z_t, z_M
-        return 1j * A_t(f) * (z - z_t) / (z_M - z_t)
+        return 1j * A_t(f) * ((z - z_t) / (z_M - z_t)) ** 2
 
-    omega = 2 * math.pi * f
+    omega = 2. * math.pi * f
     k = omega / c
 
     if check_absorbing_layer and z_t < z < z_M:
         k += absorbing_layer_term()
 
     if atmospheric_absorption_term:
-        k += 1j * atmospheric_absorption_term / (20 * math.log10(math.e))
+        k += 1j * atmospheric_absorption_term / (20. * math.log10(math.e))
 
     return k
 
@@ -82,8 +82,8 @@ def sigma(k0, Dz, Z, order=1):
         sigma_1 = 1. / (1. - (k0 * Dz / Z) * 1j)
         sigma_2 = 0.
     elif order == 2:
-        sigma_1 = 4. / (3. - (2 * k0 * Dz / Z) * 1j)
-        sigma_2 = -1. / (3. - (2 * k0 * Dz / Z) * 1j)
+        sigma_1 = 4. / (3. - (2. * k0 * Dz / Z) * 1j)
+        sigma_2 = -1. / (3. - (2. * k0 * Dz / Z) * 1j)
     else:
         return
     return [sigma_1, sigma_2]
@@ -94,8 +94,8 @@ def tau(k0, Dz, order=1):
         tau_1 = 1. / (1. + k0 * Dz * 1j)
         tau_2 = 0.
     elif order == 2:
-        tau_1 = 4. / (3. + 2 * k0 * Dz * 1j)
-        tau_2 = -1. / (3. + 2 * k0 * Dz * 1j)
+        tau_1 = 4. / (3. + 2. * k0 * Dz * 1j)
+        tau_2 = -1. / (3. + 2. * k0 * Dz * 1j)
     else:
         return
     return [tau_1, tau_2]
@@ -127,7 +127,7 @@ def atmospheric_attenuation_coefficient(f, T, p_s, hr):
     p_rel = p_s / p_s0
     T_rel = T / T0
 
-    h = 100 * relative_to_absolute_humidity()
+    h = 100. * relative_to_absolute_humidity()
     Fr_O_ = Fr_O()
     Fr_N_ = Fr_N()
 
