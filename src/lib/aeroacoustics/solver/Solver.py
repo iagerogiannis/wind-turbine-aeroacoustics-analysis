@@ -73,11 +73,8 @@ class Solver:
                 fwriter.writerow(data)
 
         print_results_period = 20
-
         results_dir = '../results'
 
-        print(100 * "*")
-        print('Solving for frequency: {}Hz'.format(self.f))
         M = int(math.ceil(self.r_max / self.Dr))
 
         if not os.path.exists('{}/f{}'.format(results_dir, self.f)):

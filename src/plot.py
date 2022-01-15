@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def plot():
+def plot(frequencies):
     def plot_contour(x, y, z, levels=20, color_bar=True, title=None, x_label=None,
                      y_label=None, cmap='Spectral', filename=None):
         fig, ax = plt.subplots(1, 1)
@@ -26,22 +26,23 @@ def plot():
 
     results_dir = '../results'
 
-    f_directories = next(os.walk('{}'.format(results_dir)))[1]
+    print()
+    print(50 * "#")
+    print()
 
     if not os.path.exists('{}/plots'.format(results_dir)):
         os.makedirs('{}/plots'.format(results_dir))
 
-    if 'plots' in f_directories:
-        f_directories.remove('plots')
+    for frequency in frequencies:
+        X = np.genfromtxt('{}/f{}/r.csv'.format(results_dir, str(frequency)), delimiter=';')
+        Y = np.genfromtxt('{}/f{}/z.csv'.format(results_dir, str(frequency)), delimiter=';')
+        Z = np.genfromtxt('{}/f{}/result.csv'.format(results_dir, str(frequency)), delimiter=';').transpose()
 
-    for f_directory in f_directories:
-        f = f_directory[1:]
-        X = np.genfromtxt('{}/f{}/r.csv'.format(results_dir, f), delimiter=';')
-        Y = np.genfromtxt('{}/f{}/z.csv'.format(results_dir, f), delimiter=';')
-        Z = np.genfromtxt('{}/f{}/result.csv'.format(results_dir, f), delimiter=';').transpose()
-
-        print('Calculating for frequency {}Hz...'.format(f))
+        print('Creating plot for frequency {}Hz...'.format(str(frequency)), end='', flush=True)
 
         plot_contour(X, Y, Z, 200, cmap='Spectral', x_label='r [m]', y_label='z [m]',
-                     title='Sound Pressure Level [dB] for frequency {}Hz'.format(f),
-                     filename='{}/plots/{}.png'.format(results_dir, f_directory))
+                     title='Sound Pressure Level [dB] for frequency {}Hz'.format(str(frequency)),
+                     filename='{}/plots/f{}.png'.format(results_dir, str(frequency)))
+
+        print('', end='\r')
+        print('Plot created for frequency: {}Hz'.format(str(frequency)))

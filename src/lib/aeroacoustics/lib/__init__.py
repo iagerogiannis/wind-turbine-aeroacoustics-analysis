@@ -52,7 +52,7 @@ def delta(k, k0):
 def kappa(c, f, z=None, z_t=None, z_M=None, atmospheric_absorption_term=None, check_absorbing_layer=True):
     def absorbing_layer_term():
         nonlocal f, z, z_t, z_M
-        return 1j * A_t(f) * (z - z_t) / (z_M - z_t)
+        return 1j * A_t(f) * ((z - z_t) / (z_M - z_t)) ** 2
 
     omega = 2 * math.pi * f
     k = omega / c
@@ -60,8 +60,8 @@ def kappa(c, f, z=None, z_t=None, z_M=None, atmospheric_absorption_term=None, ch
     if check_absorbing_layer and z_t < z < z_M:
         k += absorbing_layer_term()
 
-    if atmospheric_absorption_term:
-        k += 1j * atmospheric_absorption_term / (20 * math.log10(math.e))
+    # if atmospheric_absorption_term:
+    #     k += 1j * atmospheric_absorption_term / (20 * math.log10(math.e))
 
     return k
 
@@ -148,4 +148,9 @@ def sound_pressure_level(pc):
             SPL_min = SPL
         return SPL
     except ValueError:
-        return SPL_min
+        return
+    # global p_s0
+    #     if abs(pc) > p_s0:
+    #         return 10. * math.log10(.5 * (abs(pc) / p_s0) ** 2)
+    #     else:
+    #         return 0.
