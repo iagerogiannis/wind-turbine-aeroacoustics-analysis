@@ -10,7 +10,7 @@ from .SourceSimulator import SourceSimulator
 
 
 class Solver:
-    def __init__(self, f, Temp, theta, u_star, z0, sigma_, z_s, r_max, p_s, hr, order=1):
+    def __init__(self, f, Temp, theta, u_star, z0, sigma_, z_s, r_max, p_s, hr, results_dir, order=1):
         self.f = f
         self.Temp = Temp
         self.theta = theta
@@ -26,6 +26,8 @@ class Solver:
         self.c0 = self.calculate_c0()
         self.k0 = self.calculate_k0()
         self.Z = self.calculate_Z()
+
+        self.results_dir = results_dir
 
         grid_generator = GridGenerator(self.f, self.Temp, self.z_s)
         self.z = grid_generator.z
@@ -73,17 +75,16 @@ class Solver:
                 fwriter.writerow(data)
 
         print_results_period = 20
-        results_dir = '../results'
 
         M = int(math.ceil(self.r_max / self.Dr))
 
-        if not os.path.exists('{}/f{}'.format(results_dir, self.f)):
-            os.makedirs('{}/f{}'.format(results_dir, self.f))
+        if not os.path.exists('{}/f{}'.format(self.results_dir, self.f)):
+            os.makedirs('{}/f{}'.format(self.results_dir, self.f))
 
-        write_file('{}/f{}/z.csv'.format(results_dir, self.f), self.z[:self.zt_index])
-        write_file('{}/f{}/r.csv'.format(results_dir, self.f), np.array([i * self.Dr for i in range(1, M + 2)]))
+        write_file('{}/f{}/z.csv'.format(self.results_dir, self.f), self.z[:self.zt_index])
+        write_file('{}/f{}/r.csv'.format(self.results_dir, self.f), np.array([i * self.Dr for i in range(1, M + 2)]))
 
-        f = open('{}/f{}/result.csv'.format(results_dir, self.f), 'w', newline='')
+        f = open('{}/f{}/result.csv'.format(self.results_dir, self.f), 'w', newline='')
         writer = csv.writer(f, delimiter=';')
         for i in range(1, M + 2):
             self.psi = tdma_solver(self.M1[0], self.M1[1], self.M1[2], self.M_times_psi(self.M2))
