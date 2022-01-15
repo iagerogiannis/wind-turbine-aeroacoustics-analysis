@@ -1,8 +1,8 @@
-from src.lib.aeroacoustics.lib import *
-from src.lib.aeroacoustics.solver import Solver
+from lib.aeroacoustics import Solver
+from lib.units import *
 
-from src.lib.output import *
-from src.lib.file_manager import *
+from lib.output import *
+from lib.file_manager import *
 
 
 def solve(f, results_dir, delete_old=True):
