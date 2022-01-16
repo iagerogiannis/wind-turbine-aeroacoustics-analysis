@@ -1,41 +1,47 @@
 import os
-
 import numpy as np
-import matplotlib.pyplot as plt
+from lib.output.plots import *
 
 
-def plot(frequencies, results_dir):
-    def plot_contour(x, y, z, levels=20, color_bar=True, title=None, x_label=None,
-                     y_label=None, cmap='Spectral', filename=None):
-        fig, ax = plt.subplots(1, 1)
-        cp = ax.contourf(x, y, z, levels, cmap=cmap)
+def plot(frequencies, Lw, h, results_dir):
 
-        if color_bar:
-            fig.colorbar(cp)
-        if title:
-            ax.set_title(title, fontname='Arial', fontsize=16, fontweight="bold")
-        if x_label:
-            ax.set_xlabel(x_label, fontname='Arial', fontsize=14)
-        if y_label:
-            ax.set_ylabel(y_label, fontname='Arial', fontsize=14)
-
-        if filename:
-            plt.savefig(filename)
-        else:
-            plt.show()
-
-    if not os.path.exists('{}/plots'.format(results_dir)):
-        os.makedirs('{}/plots'.format(results_dir))
+    SPL_spectrum = []
+    SPL_for_r = []
 
     for frequency in frequencies:
-        print('Creating plot for frequency {}Hz...'.format(str(frequency)), end='', flush=True)
+        print('Creating plots for frequency {}Hz...'.format(str(frequency)), end='', flush=True)
 
-        X = np.genfromtxt('{}/f{}/r.csv'.format(results_dir, str(frequency)), delimiter=';')[1:]
-        Y = np.genfromtxt('{}/f{}/z.csv'.format(results_dir, str(frequency)), delimiter=';')
-        Z = np.genfromtxt('{}/f{}/result.csv'.format(results_dir, str(frequency)), delimiter=';')[1:].transpose()
-        plot_contour(X, Y, Z, 200, cmap='Spectral', x_label='r [m]', y_label='z [m]',
+        r = np.genfromtxt('{}/f{}/r.csv'.format(results_dir, str(frequency)), delimiter=';')[1:]
+        z = np.genfromtxt('{}/f{}/z.csv'.format(results_dir, str(frequency)), delimiter=';')
+        SPL = np.genfromtxt('{}/f{}/result.csv'.format(results_dir, str(frequency)), delimiter=';')[1:].transpose()
+
+        h_index = np.argmax(z > h)
+
+        SPL_according_to_r = np.array([np.interp(h, [z[h_index - 1], z[h_index]],
+                                                 [SPL[h_index - 1][i], SPL[h_index][i]]) for i in range(len(r))])
+
+        SPL_spectrum.append(SPL_according_to_r[-1])
+
+        SPL_for_r.append(r)
+        SPL_for_r.append(SPL_according_to_r)
+
+        plot_scatter([r, SPL_according_to_r], title='Sound Pressure Level [dB] for frequency {}Hz'.format(str(frequency)),
+                     x_label='r [m]', y_label='SPL [dB]',
+                     filename='{}/f{}/SPL_of_r.png'.format(results_dir, str(frequency)))
+
+        plot_contour(r, z, SPL, 200, cmap='Spectral_r', x_label='r [m]', y_label='z [m]',
                      title='Sound Pressure Level [dB] for frequency {}Hz'.format(str(frequency)),
-                     filename='{}/plots/f{}.png'.format(results_dir, str(frequency)))
+                     filename='{}/f{}/contour.png'.format(results_dir, str(frequency)))
 
         print('', end='\r')
-        print('Plot created for frequency: {}Hz'.format(str(frequency)))
+        print('Plots created for frequency: {}Hz'.format(str(frequency)))
+
+    plot_scatter(SPL_for_r,
+                 x_label='r [m]', y_label='SPL [dB]', legend=['f = {}Hz'.format(f) for f in frequencies],
+                 title='Sound Pressure Level [dB] at height {}m'.format(h),
+                 filename='{}/SPL.png'.format(results_dir))
+
+    plot_scatter([frequencies, SPL_spectrum, frequencies, Lw[:len(SPL_spectrum)]],
+                 x_label='Frequency [Hz]', y_label='SPL [dB]', legend=['Lp', 'Lw'],
+                 title='Sound Pressure Level compared to Sound Power Level',
+                 filename='{}/spectrum.png'.format(results_dir))
