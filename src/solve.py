@@ -1,7 +1,7 @@
 from lib.aeroacoustics import Solver
 from lib.units import *
 
-from lib.output import *
+from lib.output.console import *
 from lib.file_manager import *
 
 

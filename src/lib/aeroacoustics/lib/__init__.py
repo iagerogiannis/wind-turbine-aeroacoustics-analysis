@@ -53,8 +53,8 @@ def kappa(c, f, z=None, z_t=None, z_M=None, atmospheric_absorption_term=None, ch
     omega = 2. * math.pi * f
     k = omega / c
 
-    if check_absorbing_layer and z_t < z < z_M:
-        k += absorbing_layer_term()
+    # if check_absorbing_layer and z_t < z < z_M:
+    #     k += absorbing_layer_term()
 
     if atmospheric_absorption_term:
         k += 1j * atmospheric_absorption_term / (20. * math.log10(math.e))
@@ -137,10 +137,11 @@ def atmospheric_attenuation_coefficient(f, T, p_s, hr):
 
 def sound_pressure_level(pc):
     global p_s0, SPL_min
-    try:
-        SPL = 10. * math.log10(.5 * (abs(pc) / p_s0) ** 2)
-        if SPL < SPL_min:
-            SPL_min = SPL
-        return SPL
-    except ValueError:
-        return SPL_min
+    return 10. * math.log10(((1e7 * abs(pc) + p_s0) / p_s0) ** 2)
+    # try:
+    #     SPL = 10. * math.log10(.5 * (abs(pc) / p_s0) ** 2)
+    #     if SPL < SPL_min:
+    #         SPL_min = SPL
+    #     return SPL
+    # except ValueError:
+    #     return SPL_min
