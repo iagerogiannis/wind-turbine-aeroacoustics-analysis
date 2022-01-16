@@ -54,17 +54,26 @@ class Solver:
     def calculate_Z(self):
         return reduced_sound_impedance(self.f, self.sigma_)
 
+    def pc_i(self, psi, j):
+        r = j * self.Dr
+        return psi * cmath.exp(1j * self.k0 * r) / math.sqrt(r)
+
+    def calculate_pc(self, j):
+        return np.array([self.pc_i(psi, j) for psi in self.psi[:self.zt_index]])
+
+    def calculate_SPL(self, j):
+        return np.array([sound_pressure_level(self.pc_i(psi, j)) for psi in self.psi[:self.zt_index]])
+
     def M_times_psi(self, M):
         M_times_psi = np.empty(self.N, dtype='complex128')
 
         M_times_psi[0] = M[1][0] * self.psi[0] + M[2][0] * self.psi[1]
+        M_times_psi[-1] = M[0][-1] * self.psi[-2] + M[1][-1] * self.psi[-1]
 
         for i in range(1, self.N - 1):
             M_times_psi[i] = M[0][i - 1] * self.psi[i - 1] + \
                              M[1][i] * self.psi[i] + \
                              M[2][i] * self.psi[i + 1]
-
-        M_times_psi[-1] = M[0][-1] * self.psi[-2] + M[1][-1] * self.psi[-1]
 
         return M_times_psi
 
@@ -98,13 +107,3 @@ class Solver:
         f.close()
         print('', end='\r')
         print('Calculation completed for frequency: {}Hz'.format(self.f))
-
-    def pc_i(self, psi, j):
-        r = j * self.Dr
-        return psi * cmath.exp(1j * self.k0 * r) / math.sqrt(r)
-
-    def calculate_pc(self, j):
-        return np.array([self.pc_i(psi, j) for psi in self.psi[:self.zt_index]])
-
-    def calculate_SPL(self, j):
-        return np.array([sound_pressure_level(self.pc_i(psi, j)) for psi in self.psi[:self.zt_index]])
