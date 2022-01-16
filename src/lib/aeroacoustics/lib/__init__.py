@@ -38,15 +38,11 @@ def reduced_sound_impedance(f, sigma_):
 
 
 def alpha(k0):
-    return (1. / (2. * k0)) * 1j
+    return 1j / (2. * k0)
 
 
 def betta(k, k0):
     return alpha(k0) * (k ** 2 - k0 ** 2)
-
-
-def delta(k, k0):
-    return 1. - (k0 / k) ** 2
 
 
 def kappa(c, f, z=None, z_t=None, z_M=None, atmospheric_absorption_term=None, check_absorbing_layer=True):
@@ -102,7 +98,6 @@ def tau(k0, Dz, order=1):
 
 
 def atmospheric_attenuation_coefficient(f, T, p_s, hr):
-
     global p_s0, T0
 
     def saturation_pressure():

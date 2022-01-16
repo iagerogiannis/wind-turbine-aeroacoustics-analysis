@@ -54,11 +54,8 @@ class MBuilder:
 
         return [T_d, T_m, T_u]
 
-    def initialize_D(self):
-        return np.array([self.betta(z_i) for z_i in self.z])
-
     def add_matrix_D(self):
-        D = self.initialize_D()
+        D = np.array([self.betta(z_i) for z_i in self.z])
         self.M[1] += D
 
     def multiply_by_constant(self, constant):
