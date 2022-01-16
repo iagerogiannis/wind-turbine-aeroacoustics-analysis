@@ -28,7 +28,7 @@ def plot(frequencies, Lw, h, results_dir):
                      x_label='r [m]', y_label='SPL [dB]',
                      filename='{}/f{}/SPL_of_r.png'.format(results_dir, str(frequency)))
 
-        plot_contour(r, z, SPL, 200, cmap='turbo', x_label='r [m]', y_label='z [m]',
+        plot_contour(r, z, SPL, 200, cmap='Spectral_r', x_label='r [m]', y_label='z [m]',
                      title='Sound Pressure Level [dB] for frequency {}Hz'.format(str(frequency)),
                      filename='{}/f{}/contour.png'.format(results_dir, str(frequency)))
 
