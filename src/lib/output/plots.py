@@ -12,7 +12,7 @@ def create_plot(ax, title=None, x_label=None, y_label=None, legend=None, filenam
         ax.legend(legend)
 
     if filename:
-        plt.savefig(filename)
+        plt.savefig(filename, dpi=200)
     else:
         plt.show()
 

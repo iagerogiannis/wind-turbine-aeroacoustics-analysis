@@ -1,8 +1,8 @@
 from lib.aeroacoustics import Solver
-from lib.units import *
 
 from lib.output.console import *
 from lib.file_manager import *
+from lib.aeroacoustics.lib import *
 
 
 def solve(f, Lw, order, results_dir, delete_old=True):

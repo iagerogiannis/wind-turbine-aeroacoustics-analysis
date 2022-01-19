@@ -30,10 +30,12 @@ class Solver:
 
         self.results_dir = results_dir
 
-        grid_generator = GridGenerator(self.f, self.Temp, self.z_s)
-        self.z = grid_generator.z
-        self.Dr = grid_generator.Dr
-        self.N = grid_generator.N
+        grid = GridGenerator(self.f, self.Temp, self.z_s, self.r_max)
+        self.z = grid.z
+        self.Dr = grid.Dr
+        self.N = grid.N
+        self.M = grid.M
+        self.write_results_interval = grid.print_interval
 
         M_matrices = MBuilder(self.z, self.Dr, self.f, self.Temp, self.theta, self.u_star,
                               self.z0, self.sigma_, self.c0, self.k0, self.Z, self.a, self.order)
@@ -100,23 +102,31 @@ class Solver:
 
         print_results_period = 20
 
-        M = int(math.ceil(self.r_max / self.Dr))
-
         if not os.path.exists('{}/f{}'.format(self.results_dir, self.f)):
             os.makedirs('{}/f{}'.format(self.results_dir, self.f))
 
-        write_file('{}/f{}/z.csv'.format(self.results_dir, self.f), self.z)
-        write_file('{}/f{}/r.csv'.format(self.results_dir, self.f), np.array([i * self.Dr for i in range(1, M + 2)]))
+        r = np.array([i * self.Dr for i in range(1, self.M + 2)])
+        r_to_write = [r[i] for i in range(len(r)) if i % self.write_results_interval == 0]
+        z_to_write = [self.z[i] for i in range(len(self.z)) if i % self.write_results_interval == 0]
 
-        f = open('{}/f{}/result.csv'.format(self.results_dir, self.f), 'w', newline='')
+        write_file('{}/f{}/r.csv'.format(self.results_dir, self.f), r_to_write)
+        write_file('{}/f{}/z.csv'.format(self.results_dir, self.f), z_to_write)
+
+        f = open('{}/f{}/SPL.csv'.format(self.results_dir, self.f), 'w', newline='')
         writer = csv.writer(f, delimiter=';')
-        for j in range(1, M + 2):
+        for j in range(1, self.M + 2):
             self.psi = tdma_solver(self.M2[0], self.M2[1], self.M2[2], self.M_times_psi(self.M1))
-            SPL = self.calculate_SPL(j)
-            writer.writerow(SPL)
+            if j % self.write_results_interval == 0:
+                SPL = self.calculate_SPL(j)
+                if self.write_results_interval > 1:
+                    SPL_to_write = [SPL[i] for i in range(len(SPL)) if i % self.write_results_interval == 0]
+                else:
+                    SPL_to_write = SPL
+                writer.writerow(SPL_to_write)
             if j % print_results_period == 0:
                 print('', end='\r')
-                print('Calculating... {}%'.format(round(100 * j // M), 1), end='', flush=True)
+                print('Calculating for frequency {}Hz... {}%'.format(self.f, round(100 * j // self.M), 1),
+                      end='', flush=True)
 
         f.close()
         print('', end='\r')

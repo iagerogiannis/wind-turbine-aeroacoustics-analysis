@@ -12,7 +12,7 @@ def plot(frequencies, Lw, h, results_dir):
 
         r = np.genfromtxt('{}/f{}/r.csv'.format(results_dir, str(frequency)), delimiter=';')[1:]
         z = np.genfromtxt('{}/f{}/z.csv'.format(results_dir, str(frequency)), delimiter=';')
-        SPL = np.genfromtxt('{}/f{}/result.csv'.format(results_dir, str(frequency)), delimiter=';')[1:].transpose()
+        SPL = np.genfromtxt('{}/f{}/SPL.csv'.format(results_dir, str(frequency)), delimiter=';')[1:].transpose()
 
         h_index = np.argmax(z > h)
 
