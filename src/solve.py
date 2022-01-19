@@ -5,7 +5,7 @@ from lib.output.console import *
 from lib.file_manager import *
 
 
-def solve(f, order, results_dir, delete_old=True):
+def solve(f, Lw, order, results_dir, delete_old=True):
     z_s = 50.                                       # iyos plimnis
     r_max = 350.                                    # orizontia apostash apo a/g
 
@@ -19,8 +19,8 @@ def solve(f, order, results_dir, delete_old=True):
 
     if delete_old:
         clear_folder(results_dir)
-    for f_i in f:
-        solver = Solver(f_i, Temp, theta, u_star, z0, sigma_, z_s, r_max, ps, hr, results_dir, order=order)
+    for i in range(len(f)):
+        solver = Solver(f[i], Lw[i], Temp, theta, u_star, z0, sigma_, z_s, r_max, ps, hr, results_dir, order=order)
         solver.solve_field()
 
     print_divider()

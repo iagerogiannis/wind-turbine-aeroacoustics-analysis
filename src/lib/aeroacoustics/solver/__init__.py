@@ -10,8 +10,9 @@ from .SourceSimulator import SourceSimulator
 
 
 class Solver:
-    def __init__(self, f, Temp, theta, u_star, z0, sigma_, z_s, r_max, p_s, hr, results_dir, order=1):
+    def __init__(self, f, Lw, Temp, theta, u_star, z0, sigma_, z_s, r_max, p_s, hr, results_dir, order=1):
         self.f = f
+        self.Lw = Lw
         self.Temp = Temp
         self.theta = theta
         self.u_star = u_star
@@ -33,7 +34,6 @@ class Solver:
         self.z = grid_generator.z
         self.Dr = grid_generator.Dr
         self.N = grid_generator.N
-        self.zt_index = grid_generator.zt_index
 
         M_matrices = MBuilder(self.z, self.Dr, self.f, self.Temp, self.theta, self.u_star,
                               self.z0, self.sigma_, self.c0, self.k0, self.Z, self.a, self.order)
@@ -54,15 +54,30 @@ class Solver:
     def calculate_Z(self):
         return reduced_sound_impedance(self.f, self.sigma_)
 
-    def pc_i(self, psi, j):
-        r = j * self.Dr
-        return psi * cmath.exp(1j * self.k0 * r) / math.sqrt(r)
+    def R(self, i, j):
+        return math.sqrt((self.z[i] - self.z_s) ** 2 + (j * self.Dr) ** 2)
 
-    def calculate_pc(self, j):
-        return np.array([self.pc_i(psi, j) for psi in self.psi[:self.zt_index]])
+    def p_free(self, i, j):
+        R_ = self.R(i, j)
+        return cmath.exp(1j * self.k0 * R_) / R_
+
+    def pc_i(self, i, j):
+        r = j * self.Dr
+        return self.psi[i] * cmath.exp(1j * self.k0 * r) / math.sqrt(r)
+
+    def DL_i(self, i, j):
+        pc_abs = abs(self.pc_i(i, j))
+        p_free_abs = abs(self.p_free(i, j))
+        if pc_abs < p_free_abs:
+            return 0.
+        else:
+            return 10. * math.log((pc_abs / p_free_abs) ** 2)
+
+    def SPL_i(self, i, j):
+        return sound_pressure_level(self.DL_i(i, j), self.Lw, self.R(i, j))
 
     def calculate_SPL(self, j):
-        return np.array([sound_pressure_level(self.pc_i(psi, j)) for psi in self.psi[:self.zt_index]])
+        return np.array([self.SPL_i(i, j) for i in range(len(self.psi))])
 
     def M_times_psi(self, M):
         M_times_psi = np.empty(self.N, dtype='complex128')
@@ -90,19 +105,18 @@ class Solver:
         if not os.path.exists('{}/f{}'.format(self.results_dir, self.f)):
             os.makedirs('{}/f{}'.format(self.results_dir, self.f))
 
-        write_file('{}/f{}/z.csv'.format(self.results_dir, self.f), self.z[:self.zt_index])
+        write_file('{}/f{}/z.csv'.format(self.results_dir, self.f), self.z)
         write_file('{}/f{}/r.csv'.format(self.results_dir, self.f), np.array([i * self.Dr for i in range(1, M + 2)]))
 
         f = open('{}/f{}/result.csv'.format(self.results_dir, self.f), 'w', newline='')
         writer = csv.writer(f, delimiter=';')
-        for i in range(1, M + 2):
-            self.psi = tdma_solver(self.M1[0], self.M1[1], self.M1[2], self.M_times_psi(self.M2))
-            # self.psi = tdma_solver(self.M2[0], self.M2[1], self.M2[2], self.M_times_psi(self.M1))
-            SPL = self.calculate_SPL(i)
+        for j in range(1, M + 2):
+            self.psi = tdma_solver(self.M2[0], self.M2[1], self.M2[2], self.M_times_psi(self.M1))
+            SPL = self.calculate_SPL(j)
             writer.writerow(SPL)
-            if i % print_results_period == 0:
+            if j % print_results_period == 0:
                 print('', end='\r')
-                print('Calculating... {}%'.format(round(100 * i // M), 1), end='', flush=True)
+                print('Calculating... {}%'.format(round(100 * j // M), 1), end='', flush=True)
 
         f.close()
         print('', end='\r')
