@@ -14,10 +14,13 @@ def plot(frequencies, Lw, h, results_dir):
         z = np.genfromtxt('{}/f{}/z.csv'.format(results_dir, str(frequency)), delimiter=';')
         SPL = np.genfromtxt('{}/f{}/SPL.csv'.format(results_dir, str(frequency)), delimiter=';')[1:].transpose()
 
+        if r.shape[0] != SPL.shape[1]:
+            r = r[:-1]
+
         h_index = np.argmax(z > h)
 
         SPL_according_to_r = np.array([np.interp(h, [z[h_index - 1], z[h_index]],
-                                                 [SPL[h_index - 1][i], SPL[h_index][i]]) for i in range(len(r))])
+                                                 [SPL[h_index - 1][i], SPL[h_index][i]]) for i in range(SPL.shape[1])])
 
         SPL_spectrum.append(SPL_according_to_r[-1])
 
@@ -28,7 +31,7 @@ def plot(frequencies, Lw, h, results_dir):
                      x_label='r [m]', y_label='SPL [dB]',
                      filename='{}/f{}/SPL_of_r.png'.format(results_dir, str(frequency)))
 
-        plot_contour(r, z, SPL, 200, cmap='Spectral_r', x_label='r [m]', y_label='z [m]',
+        plot_contour(r, z, SPL, 200, z_max_percentage=.7, y_max=200., cmap='Spectral_r', x_label='r [m]', y_label='z [m]',
                      title='Sound Pressure Level [dB] for frequency {}Hz'.format(str(frequency)),
                      filename='{}/f{}/contour.png'.format(results_dir, str(frequency)))
 

@@ -15,7 +15,7 @@ p_s0 = atm_to_pa(1.)
 Ypologismos At: xrhsimopoietai ston oro poy ypeiserxetai mesa
 ston kymatiko arithmo twn komvwn toy aporrofitikoy stromatos
 """
-A_t_ = [.2, .2, .4, .5, 1., 1.]
+A_t_ = [.2, .2, .4, .5, 1., 10.]
 f_ = [0., 30., 125., 500., 1000., 10000.]
 
 
