@@ -37,10 +37,11 @@ def plot_contour(x, y, z, levels=20, z_max_abs=None, z_max_percentage=None, y_ma
     if color_bar:
         fig.colorbar(cp)
     create_plot(ax, title, x_label, y_label, filename=filename)
+    plt.close(fig)
 
 
 def plot_scatter(xy_sets, title=None, x_label=None, y_label=None, legend=None, filename=None):
     fig, ax = plt.subplots()
     ax.plot(*xy_sets)
     create_plot(ax, title, x_label, y_label, legend, filename)
-
+    plt.close(fig)

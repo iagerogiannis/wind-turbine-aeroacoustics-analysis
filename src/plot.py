@@ -1,49 +1,99 @@
-import numpy as np
+import os
+
 from lib.output.plots import *
+from lib.algorithms import *
 
 
-def plot(frequencies, Lw, h, results_dir):
+def plot(frequency, h, results_dir):
 
-    SPL_spectrum = []
-    SPL_for_r = []
+    print('Creating plots...', end='', flush=True)
 
-    for frequency in frequencies:
-        print('Creating plots for frequency {}Hz...'.format(str(frequency)), end='', flush=True)
+    r = np.genfromtxt('{}/r.csv'.format(results_dir), delimiter=';')[1:]
+    z = np.genfromtxt('{}/z.csv'.format(results_dir), delimiter=';')
+    SPL = np.genfromtxt('{}/SPL.csv'.format(results_dir), delimiter=';')[1:].transpose()
 
-        r = np.genfromtxt('{}/f{}/r.csv'.format(results_dir, str(frequency)), delimiter=';')[1:]
-        z = np.genfromtxt('{}/f{}/z.csv'.format(results_dir, str(frequency)), delimiter=';')
-        SPL = np.genfromtxt('{}/f{}/SPL.csv'.format(results_dir, str(frequency)), delimiter=';')[1:].transpose()
+    if r.shape[0] != SPL.shape[1]:
+        r = r[:-1]
 
-        if r.shape[0] != SPL.shape[1]:
-            r = r[:-1]
+    h_index = np.argmax(z > h)
 
-        h_index = np.argmax(z > h)
+    SPL_according_to_r = np.array([np.interp(h, [z[h_index - 1], z[h_index]],
+                                             [SPL[h_index - 1][i], SPL[h_index][i]]) for i in range(SPL.shape[1])])
 
-        SPL_according_to_r = np.array([np.interp(h, [z[h_index - 1], z[h_index]],
-                                                 [SPL[h_index - 1][i], SPL[h_index][i]]) for i in range(SPL.shape[1])])
+    plot_scatter([r, SPL_according_to_r], title='Sound Pressure Level [dB] for frequency {}Hz'.format(str(frequency)),
+                 x_label='r [m]', y_label='SPL [dB]',
+                 filename='{}/SPL_of_r.png'.format(results_dir))
 
-        SPL_spectrum.append(SPL_according_to_r[-1])
+    plot_contour(r, z, SPL, 200, z_max_percentage=.7, cmap='Spectral_r', x_label='r [m]', y_label='z [m]',
+                 title='Sound Pressure Level [dB] for frequency {}Hz'.format(str(frequency)),
+                 filename='{}/contour_with_layer.png'.format(results_dir))
 
-        SPL_for_r.append(r)
-        SPL_for_r.append(SPL_according_to_r)
+    plot_contour(r, z, SPL, 200, z_max_percentage=.7, y_max=200., cmap='Spectral_r', x_label='r [m]', y_label='z [m]',
+                 title='Sound Pressure Level [dB] for frequency {}Hz'.format(str(frequency)),
+                 filename='{}/contour.png'.format(results_dir))
 
-        plot_scatter([r, SPL_according_to_r], title='Sound Pressure Level [dB] for frequency {}Hz'.format(str(frequency)),
-                     x_label='r [m]', y_label='SPL [dB]',
-                     filename='{}/f{}/SPL_of_r.png'.format(results_dir, str(frequency)))
+    print('', end='\r')
+    print('Plots created')
 
-        plot_contour(r, z, SPL, 200, z_max_percentage=.7, y_max=200., cmap='Spectral_r', x_label='r [m]', y_label='z [m]',
-                     title='Sound Pressure Level [dB] for frequency {}Hz'.format(str(frequency)),
-                     filename='{}/f{}/contour.png'.format(results_dir, str(frequency)))
 
-        print('', end='\r')
-        print('Plots created for frequency: {}Hz'.format(str(frequency)))
+def plot_totals(h, results_dir):
+    def read_Lw(dir):
+        f = open("{}\\Lw.dat".format(dir), "r")
+        return float(f.read())
 
-    plot_scatter(SPL_for_r,
-                 x_label='r [m]', y_label='SPL [dB]', legend=['f = {}Hz'.format(f) for f in frequencies],
-                 title='Sound Pressure Level [dB] at height {}m'.format(h),
-                 filename='{}/SPL.png'.format(results_dir))
+    data = []
+    directories = os.walk(results_dir)
+    for dir in directories:
+        directory = os.path.normpath(dir[0]).split(os.sep)
+        if len(directory) == 4 and directory[2][0] == 'f':
+            f = float(directory[2][1:])
+            theta = float(directory[3][5:])
+            Lw = read_Lw(dir[0])
+            SPL = np.genfromtxt('{}/SPL.csv'.format(dir[0]), delimiter=';')[1:].transpose()
+            z = np.genfromtxt('{}/z.csv'.format(dir[0]), delimiter=';')
+            r = np.genfromtxt('{}/r.csv'.format(dir[0]), delimiter=';')[1:]
+            h_index = np.argmax(z > h)
+            SPL_of_r = np.array([np.interp(
+                h, [z[h_index - 1], z[h_index]], [SPL[h_index - 1][i], SPL[h_index][i]]) for i in range(SPL.shape[1])])
+            if r.shape[0] != SPL.shape[1]:
+                r = r[:-1]
+            data.append({
+                "frequency": f,
+                "theta": theta,
+                "Lw": Lw,
+                "r": r,
+                "SPL_of_r": SPL_of_r,
+                "SPL@receiver": SPL_of_r[-1]
+            })
 
-    plot_scatter([frequencies, SPL_spectrum, frequencies, Lw[:len(SPL_spectrum)]],
-                 x_label='Frequency [Hz]', y_label='SPL [dB]', legend=['Lp', 'Lw'],
-                 title='Sound Pressure Level compared to Sound Power Level',
-                 filename='{}/spectrum.png'.format(results_dir))
+    thetas = list(set([item['theta'] for item in data if 'theta' in item]))
+
+    for theta in thetas:
+        f = [item['frequency'] for item in data if item['theta'] == theta]
+        SPL_at_receiver = [item['SPL@receiver'] for item in data if item['theta'] == theta]
+        Lw = [item['Lw'] for item in data if item['theta'] == theta]
+
+        SPL_of_r = [item['SPL_of_r'] for item in data if item['theta'] == theta]
+        r = [item['r'] for item in data if item['theta'] == theta]
+
+        bubble_sort(f, [SPL_at_receiver, Lw, SPL_of_r, r])
+
+        SPL_of_r_total = []
+        for i in range(len(SPL_of_r)):
+            SPL_of_r_total.append(r[i])
+            SPL_of_r_total.append(SPL_of_r[i])
+
+        plots_dir = '{}/total/theta{}'.format(results_dir, str(int(theta)))
+
+        if not os.path.exists(plots_dir):
+            os.makedirs(plots_dir)
+
+        plot_scatter([f, SPL_at_receiver, f, Lw],
+                     x_label='Frequency [Hz]', y_label='SPL [dB]', legend=['Lp', 'Lw'],
+                     title='Sound Pressure Level compared to Sound Power Level',
+                     filename='{}/spectrum.png'.format(plots_dir))
+
+        plot_scatter(SPL_of_r_total,
+                     x_label='r [m]', y_label='SPL [dB]', legend=['f = {}Hz'.format(f_i) for f_i in f],
+                     title='Sound Pressure Level [dB] at height {}m'.format(h),
+                     filename='{}/SPL.png'.format(plots_dir))

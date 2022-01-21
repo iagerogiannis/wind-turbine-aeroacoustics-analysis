@@ -4,7 +4,7 @@ from ..lib import *
 
 
 class GridGenerator:
-    def __init__(self, f, Temp, z_s, r_max, total_nodes=4e6, default_Dz=False):
+    def __init__(self, f, Temp, z_s, r_max, total_nodes=4e6, default_Dz=True):
         self.f = f
         self.z_s = z_s
         self.r_max = r_max
@@ -37,7 +37,7 @@ class GridGenerator:
         return M * N + M + N + 1
 
     def calculate_nodes_printed_interval(self):
-        for i in range(2, 20):
+        for i in range(2, 40):
             nodes = (self.M / i) * (self.N / i) + (self.M + self.N) / i + 1
             if nodes < self.total_nodes:
                 return i - 1
