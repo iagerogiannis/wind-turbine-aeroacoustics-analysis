@@ -36,7 +36,6 @@ class Solver:
         self.N = grid.N
         self.M = grid.M
         self.write_results_interval = grid.print_interval
-        print(self.write_results_interval)
 
         M_matrices = MBuilder(self.z, self.Dr, self.f, self.Temp, self.theta, self.u_star,
                               self.z0, self.sigma_, self.c0, self.k0, self.Z, self.a, self.order)
