@@ -136,3 +136,12 @@ def atmospheric_attenuation_coefficient(f, T, p_s, hr):
 
 def sound_pressure_level(DL, Lw, R_):
     return Lw - 10. * math.log10(4 * math.pi * R_ ** 2) + DL
+
+
+def apply_A_weighting(SPL):
+    weights = [-56.7, -39.4, -26.2, -16.1, -8.6, -3.2, 0., 1.2, 1., -1.1]
+    return [SPL[i] + weights[i] for i in range(len(SPL))]
+
+
+def equivalent_level(SPL):
+    return 10 * math.log10(sum([10 ** (SPL_i / 10.) for SPL_i in SPL]))

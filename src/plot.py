@@ -1,7 +1,10 @@
 import os
+import pandas as pd
 
 from lib.output.plots import *
 from lib.algorithms import *
+
+from lib.aeroacoustics import *
 
 
 def plot(frequency, h, results_dir):
@@ -41,6 +44,10 @@ def plot_totals(h, results_dir):
         f = open("{}\\Lw.dat".format(dir), "r")
         return float(f.read())
 
+    def write_file(filename, data):
+        with open(filename, 'w') as f:
+            f.write(str(data))
+
     data = []
     directories = os.walk(results_dir)
     for dir in directories:
@@ -66,11 +73,18 @@ def plot_totals(h, results_dir):
                 "SPL@receiver": SPL_of_r[-1]
             })
 
+            pd.DataFrame({
+                "r [m]": r,
+                "SPL [dB]": SPL_of_r
+            }).to_csv('{}/SPL_of_r.csv'.format(dir[0]), sep=';', encoding='utf-8')
+
     thetas = list(set([item['theta'] for item in data if 'theta' in item]))
 
     for theta in thetas:
         f = [item['frequency'] for item in data if item['theta'] == theta]
         SPL_at_receiver = [item['SPL@receiver'] for item in data if item['theta'] == theta]
+        SPL_A_weighted = apply_A_weighting(SPL_at_receiver)
+        SPL_eq = equivalent_level(SPL_at_receiver)
         Lw = [item['Lw'] for item in data if item['theta'] == theta]
 
         SPL_of_r = [item['SPL_of_r'] for item in data if item['theta'] == theta]
@@ -88,12 +102,26 @@ def plot_totals(h, results_dir):
         if not os.path.exists(plots_dir):
             os.makedirs(plots_dir)
 
+        pd.DataFrame({
+            "Frequency [Hz]": f,
+            "Lw [dB]": Lw,
+            "SPL [dB]": SPL_at_receiver,
+            "SPL (A-weighted) [dB]": SPL_A_weighted
+        }).to_csv('{}/data.csv'.format(plots_dir), sep=';', encoding='utf-8')
+
+        write_file('{}/SPL_eq.dat'.format(plots_dir), SPL_eq)
+
+        plot_scatter([f, SPL_at_receiver, f, SPL_A_weighted, f, [SPL_eq for i in range(len(SPL_A_weighted))]],
+                     x_label='Frequency [Hz]', y_label='SPL [dB]', legend=['SLP', 'SLP (A-weighted)', 'SLP (equivalent)'],
+                     title='Sound Pressure Level',
+                     filename='{}/SPL.png'.format(plots_dir))
+
         plot_scatter([f, SPL_at_receiver, f, Lw],
                      x_label='Frequency [Hz]', y_label='SPL [dB]', legend=['Lp', 'Lw'],
                      title='Sound Pressure Level compared to Sound Power Level',
-                     filename='{}/spectrum.png'.format(plots_dir))
+                     filename='{}/SPL_comparison.png'.format(plots_dir))
 
         plot_scatter(SPL_of_r_total,
                      x_label='r [m]', y_label='SPL [dB]', legend=['f = {}Hz'.format(f_i) for f_i in f],
-                     title='Sound Pressure Level [dB] at height {}m'.format(h),
-                     filename='{}/SPL.png'.format(plots_dir))
+                     title='Sound Pressure Level [dB] according to r'.format(h),
+                     filename='{}/SPL_of_r.png'.format(plots_dir))
