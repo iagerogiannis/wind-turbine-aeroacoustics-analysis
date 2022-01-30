@@ -6,6 +6,7 @@ from src.plot import *
 
 
 results_dir = '../results'
+totals_dir = '../results/total'
 
 # iyos dekth
 h = 14
@@ -36,9 +37,10 @@ for i in range(len(f)):
         if should_delete_old:
             clear_folder(full_results_dir)
         print('Frequency: {}Hz | Theta: {}deg'.format(f[i], int(math.degrees(theta_i))))
-        solver = Solver(f[i], Lw[i], Temp, theta_i, u_star, z0, sigma_, z_s, r_max, ps, hr, full_results_dir, order=order)
-        solver.solve_field()
-        plot(f[i], h, full_results_dir)
+        # solver = Solver(f[i], Lw[i], Temp, theta_i, u_star, z0, sigma_, z_s, r_max, ps, hr, full_results_dir, order=order)
+        # solver.solve_field()
+        plot(f[i], h, theta_i, full_results_dir)
         print_divider()
 
-plot_totals(14., results_dir)
+# plot_totals(totals_dir)
+# plot_results_2(results_dir)

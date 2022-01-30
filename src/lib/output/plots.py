@@ -11,15 +11,14 @@ def create_plot(ax, title=None, x_label=None, y_label=None, legend=None, filenam
         ax.set_ylabel(y_label, fontname='Arial', fontsize=14)
     if legend:
         ax.legend(legend)
-
     if filename:
         plt.savefig(filename, dpi=200)
     else:
         plt.show()
 
 
-def plot_contour(x, y, z, levels=20, z_max_abs=None, z_max_percentage=None, y_max=None, color_bar=True, title=None, x_label=None,
-                 y_label=None, cmap='Spectral_r', filename=None):
+def plot_contour(x, y, z, levels=20, z_max_abs=None, z_max_percentage=None, y_max=None, color_bar=True, title=None,
+                 x_label=None, y_label=None, z_label=None, cmap='Spectral_r', filename=None):
     fig, ax = plt.subplots(1, 1)
     if z_max_abs:
         z_min = z.min()
@@ -35,7 +34,9 @@ def plot_contour(x, y, z, levels=20, z_max_abs=None, z_max_percentage=None, y_ma
         z = z[:index]
     cp = ax.contourf(x, y, z, levels, cmap=cmap)
     if color_bar:
-        fig.colorbar(cp)
+        cbar = fig.colorbar(cp)
+        if z_label:
+            cbar.set_label(z_label, rotation=90, fontname='Arial', fontsize=14, labelpad=10)
     create_plot(ax, title, x_label, y_label, filename=filename)
     plt.close(fig)
 
