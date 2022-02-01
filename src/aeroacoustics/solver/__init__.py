@@ -2,7 +2,7 @@ import cmath
 import csv
 import os
 
-from src.lib.numerical_analysis import *
+from src.numerical_analysis import *
 from ..lib import *
 from .MBuilder import MBuilder
 from .GridGenerator import GridGenerator

@@ -1,6 +1,6 @@
 import math
 import numpy as np
-from src.lib.units import *
+from src.units import *
 
 g = 1.4
 R = 287.
