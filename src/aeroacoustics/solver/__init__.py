@@ -32,7 +32,7 @@ class Solver:
 
         self.results_dir = results_dir
 
-        grid = GridGenerator(self.f, self.Temp, self.z_s, self.r_max, absorbing_layer=absorbing_layer)
+        grid = GridGenerator(self.f, self.Temp, self.z_s, self.r_max, absorbing_layer=self.absorbing_layer)
         self.z = grid.z
         self.Dr = grid.Dr
         self.N = grid.N
