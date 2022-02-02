@@ -1,0 +1,10 @@
+cff-version: 1.0.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Gerogiannis"
+  given-names: "Ioannis"
+  orcid: "https://orcid.org/0000-0002-2253-8202"
+title: "Aeroacoustics Analysis of Wind Turbine"
+version: 1.0.0
+date-released: 2022-02-02
+url: "https://github.com/iagerogiannis/wind-turbine-aeroacoustics-analysis"
