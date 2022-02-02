@@ -3,7 +3,7 @@ from ..lib import *
 
 class MBuilder:
 
-    def __init__(self, z, Dr, f, Temp, theta, u_star, z0, sigma_, c0, k0, Z, a, order=1):
+    def __init__(self, z, Dr, f, Temp, theta, u_star, z0, sigma_, c0, k0, Z, a, order=1, absorbing_layer=True):
         # Initialization
         self.f = f
         self.Temp = Temp
@@ -16,6 +16,7 @@ class MBuilder:
         self.k0 = k0
         self.a = a
         self.order = order
+        self.absorbing_layer = absorbing_layer
 
         # Grid parameters
         self.z = z
@@ -35,7 +36,8 @@ class MBuilder:
     def betta(self, z_i):
         u_w = wind_velocity(z_i, self.u_star, self.z0)
         c = c_effective(u_w, self.theta, self.c0)
-        k = kappa(c, self.f, z_i, self.z_t, self.z_M, atmospheric_absorption_term=self.a)
+        k = kappa(c, self.f, z_i, self.z_t, self.z_M,
+                  atmospheric_absorption_term=self.a, absorbing_layer=self.absorbing_layer)
         return betta(k, self.k0)
 
     def initialize_T(self):

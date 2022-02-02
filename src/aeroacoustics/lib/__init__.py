@@ -44,7 +44,7 @@ def betta(k, k0):
     return alpha(k0) * (k ** 2 - k0 ** 2)
 
 
-def kappa(c, f, z=None, z_t=None, z_M=None, atmospheric_absorption_term=None, check_absorbing_layer=True):
+def kappa(c, f, z=None, z_t=None, z_M=None, atmospheric_absorption_term=None, absorbing_layer=True):
     def absorbing_layer_term():
         nonlocal f, z, z_t, z_M
         return 1j * A_t(f) * ((z - z_t) / (z_M - z_t)) ** 2
@@ -52,7 +52,7 @@ def kappa(c, f, z=None, z_t=None, z_M=None, atmospheric_absorption_term=None, ch
     omega = 2. * math.pi * f
     k = omega / c
 
-    if check_absorbing_layer and z_t < z < z_M:
+    if absorbing_layer and z_t < z < z_M:
         k += absorbing_layer_term()
 
     if atmospheric_absorption_term:
