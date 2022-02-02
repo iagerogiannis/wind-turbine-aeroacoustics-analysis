@@ -4,7 +4,7 @@ from ..lib import *
 
 
 class GridGenerator:
-    def __init__(self, f, Temp, z_s, r_max, total_nodes=4e6, absorbing_layer=False, default_Dz=False):
+    def __init__(self, f, Temp, z_s, r_max, total_nodes=4e6, absorbing_layer=True, default_Dz=False):
         self.f = f
         self.z_s = z_s
         self.r_max = r_max
