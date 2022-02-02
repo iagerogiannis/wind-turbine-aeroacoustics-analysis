@@ -4,7 +4,7 @@ from ..lib import *
 
 
 class GridGenerator:
-    def __init__(self, f, Temp, z_s, r_max, total_nodes=4e6, default_Dz=False):
+    def __init__(self, f, Temp, z_s, r_max, total_nodes=4e6, absorbing_layer=True, default_Dz=False):
         self.f = f
         self.z_s = z_s
         self.r_max = r_max
@@ -12,7 +12,10 @@ class GridGenerator:
         self.default_Dz = default_Dz
         self.c0 = nominal_speed_of_sound(Temp)
         self.lambda_ = wave_length(self.f, self.c0)
-        self.h_max = 4. * self.z_s + 50. * self.lambda_
+
+        self.h_max = 4. * self.z_s
+        if absorbing_layer:
+            self.h_max += 50. * self.lambda_
 
         self.Dz = self.Dr = self.calculate_Dz()
         self.N = self.calculate_N(self.Dz)
@@ -50,10 +53,10 @@ class GridGenerator:
         def quadratic_equation_solver(a, b, c):
             D = b ** 2 - 4 * a * c
             return (-b + math.sqrt(D)) / (2 * a), (-b - math.sqrt(D)) / (2 * a)
-        total_nodes = self.total_nodes
+
         Dz = self.lambda_ / 10
-        if self.default_Dz or self.num_of_nodes(Dz) > total_nodes:
+        if self.default_Dz or self.num_of_nodes(Dz) > self.total_nodes:
             return Dz
         else:
-            return quadratic_equation_solver(total_nodes - 1, -(self.h_max + self.r_max), - self.h_max * self.r_max)[0]
-
+            return quadratic_equation_solver(self.total_nodes - 1, -(self.h_max + self.r_max),
+                                             - self.h_max * self.r_max)[0]

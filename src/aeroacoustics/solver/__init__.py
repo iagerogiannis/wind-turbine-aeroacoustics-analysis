@@ -2,7 +2,7 @@ import cmath
 import csv
 import os
 
-from src.lib.numerical_analysis import *
+from src.numerical_analysis import *
 from ..lib import *
 from .MBuilder import MBuilder
 from .GridGenerator import GridGenerator
@@ -10,7 +10,8 @@ from .SourceSimulator import SourceSimulator
 
 
 class Solver:
-    def __init__(self, f, Lw, Temp, theta, u_star, z0, sigma_, z_s, r_max, p_s, hr, results_dir, order=1):
+    def __init__(self, f, Lw, Temp, theta, u_star, z0, sigma_,
+                 z_s, r_max, p_s, hr, results_dir, order=1, absorbing_layer=True):
         self.f = f
         self.Lw = Lw
         self.Temp = Temp
@@ -23,6 +24,7 @@ class Solver:
         self.p_s = p_s
         self.hr = hr
         self.order = order
+        self.absorbing_layer = absorbing_layer
         self.a = self.calculate_a()
         self.c0 = self.calculate_c0()
         self.k0 = self.calculate_k0()
@@ -30,7 +32,7 @@ class Solver:
 
         self.results_dir = results_dir
 
-        grid = GridGenerator(self.f, self.Temp, self.z_s, self.r_max)
+        grid = GridGenerator(self.f, self.Temp, self.z_s, self.r_max, absorbing_layer=self.absorbing_layer)
         self.z = grid.z
         self.Dr = grid.Dr
         self.N = grid.N
@@ -38,7 +40,7 @@ class Solver:
         self.write_results_interval = grid.print_interval
 
         M_matrices = MBuilder(self.z, self.Dr, self.f, self.Temp, self.theta, self.u_star,
-                              self.z0, self.sigma_, self.c0, self.k0, self.Z, self.a, self.order)
+                              self.z0, self.sigma_, self.c0, self.k0, self.Z, self.a, self.order, self.absorbing_layer)
         self.M1, self.M2 = M_matrices.M1, M_matrices.M2
 
         source = SourceSimulator(self.z_s, self.Z, self.k0)
@@ -51,7 +53,7 @@ class Solver:
         return nominal_speed_of_sound(self.Temp)
 
     def calculate_k0(self):
-        return kappa(self.c0, self.f, atmospheric_absorption_term=self.a, check_absorbing_layer=False)
+        return kappa(self.c0, self.f, atmospheric_absorption_term=self.a, absorbing_layer=False)
 
     def calculate_Z(self):
         return reduced_sound_impedance(self.f, self.sigma_)
