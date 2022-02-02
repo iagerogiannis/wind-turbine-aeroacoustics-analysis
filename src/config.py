@@ -1,16 +1,15 @@
 # -- Configuration Version --
 config_version = 1
-# -- Solver configuration --
 
-f_to_calculate = [500.]
-f_to_plot = [250., 500., 1000., 4000.]
+# -- Solver configuration --
+f_to_calculate = [16., 31.5, 63., 125., 250., 500., 1000., 2000., 4000., 8000.]
+f_to_plot = [250., 1000., 4000.]
 
 order = 2
-absorbing_layer = False
+absorbing_layer = True
 
 
 # -- Results Files configuration --
-
 should_delete_old_results = False
 
 results_directory = '../results/config{}'.format(config_version)
