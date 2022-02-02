@@ -18,9 +18,9 @@ def read_and_generate_data(results_dir, h=None):
     for dir_ in directories:
         case_dir = dir_[0]
         directory = os.path.normpath(case_dir).split(os.sep)
-        if len(directory) == 4 and directory[2][0] == 'f':
-            f = float(directory[2][1:])
-            theta = float(directory[3][5:])
+        if directory[-2][0] == 'f' and directory[-1][:5] == 'theta':
+            f = float(directory[-2][1:])
+            theta = float(directory[-1][5:])
             Lw = read_value_from_file(case_dir, 'Lw.dat')
 
             if not h:
@@ -34,7 +34,7 @@ def read_and_generate_data(results_dir, h=None):
                 pd.DataFrame({
                     "r [m]": r,
                     "SPL [dB]": SPL_of_r
-                }).to_csv('{}/SPL_of_r.csv'.format(dir_[0]), sep=';', index=False, encoding='utf-8')
+                }).to_csv('{}/SPL_of_r.csv'.format(case_dir), sep=';', index=False, encoding='utf-8')
 
             SPL_at_receiver = SPL_of_r[-1]
 

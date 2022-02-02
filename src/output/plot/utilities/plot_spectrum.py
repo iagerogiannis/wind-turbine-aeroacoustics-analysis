@@ -12,7 +12,7 @@ def plot_spectrum(totals_dir, f_to_plot=None):
     for dir_ in directories:
         total_results_dir = dir_[0]
         directory = os.path.normpath(total_results_dir).split(os.sep)
-        if len(directory) == 4:
+        if directory[-1][:5] == 'theta':
             data = pd.read_csv('{}/data.csv'.format(total_results_dir), sep=';')
 
             f = np.array(data['Frequency [Hz]'])
