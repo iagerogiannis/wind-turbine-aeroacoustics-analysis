@@ -13,6 +13,7 @@ def plot_spectrum(totals_dir, f_to_plot=None):
         total_results_dir = dir_[0]
         directory = os.path.normpath(total_results_dir).split(os.sep)
         if directory[-1][:5] == 'theta':
+            theta = directory[-1][5:]
             data = pd.read_csv('{}/data.csv'.format(total_results_dir), sep=';')
 
             f = np.array(data['Frequency [Hz]'])
@@ -29,10 +30,10 @@ def plot_spectrum(totals_dir, f_to_plot=None):
             plot_scatter([f, SPL_at_receiver, f, SPL_A_weighted, f, SPL_eq_array],
                          x_label='Frequency [Hz]', y_label='SPL [dB]',
                          legend=['SPL', 'SPL (A-weighted)', 'SPL (equivalent)'],
-                         title='Sound Pressure Level',
+                         title='Sound Pressure Level for {}deg'.format(theta),
                          filename='{}/SPL.png'.format(total_results_dir))
 
-            plot_scatter([f, SPL_at_receiver, f, Lw],
-                         x_label='Frequency [Hz]', y_label='SPL [dB]', legend=['Lp', 'Lw'],
-                         title='Sound Pressure Level compared to Sound Power Level',
+            plot_scatter([f, SPL_A_weighted, f, Lw],
+                         x_label='Frequency [Hz]', y_label='SPL [dB]', legend=['Lp (A-weighted)', 'Lw'],
+                         title='Lp compared to Lw for {}deg'.format(theta),
                          filename='{}/SPL_comparison.png'.format(total_results_dir))
