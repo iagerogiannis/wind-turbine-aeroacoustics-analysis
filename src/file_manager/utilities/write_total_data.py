@@ -14,13 +14,14 @@ def write_total_data(results_dir, data):
         f = [item['frequency'] for item in data if item['theta'] == theta]
         Lw = [item['Lw'] for item in data if item['theta'] == theta]
         SPL_at_receiver = [item['SPL@receiver'] for item in data if item['theta'] == theta]
-        SPL_A_weighted = apply_A_weighting(SPL_at_receiver)
-        SPL_eq = equivalent_level(SPL_at_receiver)
 
         SPL_of_r = [item['SPL_of_r'] for item in data if item['theta'] == theta]
         r = [item['r'] for item in data if item['theta'] == theta]
 
         bubble_sort(f, [SPL_at_receiver, Lw, SPL_of_r, r])
+
+        SPL_A_weighted = apply_A_weighting(SPL_at_receiver)
+        SPL_eq = equivalent_level(SPL_A_weighted)
 
         total_results_dir = '{}/total/theta{}'.format(results_dir, str(int(theta)))
 

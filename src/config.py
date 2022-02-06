@@ -5,7 +5,7 @@ config_version = 1
 f_to_calculate = [16., 31.5, 63., 125., 250., 500., 1000., 2000., 4000., 8000.]
 f_to_plot = [250., 1000., 4000.]
 
-order = 2
+order = 1
 absorbing_layer = True
 
 
