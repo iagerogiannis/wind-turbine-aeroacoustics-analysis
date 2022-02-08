@@ -1,10 +1,11 @@
-from src.algorithms import flatten_2d_list
+from src.algorithms import flatten_2d_list, bubble_sort_dicts
 from src.output.plot.lib import plot_scatter
 
 
 def plot_SPL_of_r(totals_dir, data, f_to_plot):
 
     thetas = list(set([item['theta'] for item in data if 'theta' in item]))
+    bubble_sort_dicts(data, 'frequency')
 
     for theta in thetas:
         total_results_dir = '{}/theta{}'.format(totals_dir, str(int(theta)))
